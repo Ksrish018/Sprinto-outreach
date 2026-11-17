@@ -1,7 +1,7 @@
 import ui from "@/components/ui.module.css";
-import { EmptyState } from "@/components/EmptyState";
 import { PageHeader } from "@/components/PageHeader";
 import { getKillState, getMonthLedger } from "@/lib/queries";
+import { disagreementNow } from "@/lib/sync";
 
 const QUOTA: Record<string, { label: string; limit?: number }> = {
   hunter_search: { label: "Hunter searches", limit: 50 },
@@ -15,7 +15,7 @@ const QUOTA: Record<string, { label: string; limit?: number }> = {
 };
 
 export default async function Health() {
-  const [kill, ledger] = await Promise.all([getKillState(), getMonthLedger()]);
+  const [kill, ledger, dis] = await Promise.all([getKillState(), getMonthLedger(), disagreementNow()]);
   return (
     <>
       <PageHeader title="Health" meta="Kill switch, API spend this month, and whether every loop is closing" />
@@ -30,8 +30,8 @@ export default async function Health() {
           </section>
           <section className={ui.card}>
             <span className="label" style={{ color: "var(--text3)" }}>Disagreement score</span>
-            <p style={{ fontSize: 18, margin: "8px 0 0" }}>No drafts yet</p>
-            <p className="caption" style={{ margin: "4px 0 0" }}>Measured from M5, once drafts are sent from Gmail</p>
+            <p style={{ fontSize: 18, margin: "8px 0 0" }}>{dis.n ? `${Math.round(dis.score * 100)}%` : "No sent drafts yet"}</p>
+            <p className="caption" style={{ margin: "4px 0 0" }}>Last {dis.n} sent or discarded drafts. Kill line: above 50% over 20, after 2 weeks. Should fall week on week.</p>
           </section>
         </div>
 
@@ -55,10 +55,17 @@ export default async function Health() {
           )}
         </section>
 
-        <EmptyState title="Loop health arrives with the loops">
-          Pairs stored versus used, the share of drafts that got past corrections, the disagreement trend and scrape failure
-          reasons appear here from milestone M5.
-        </EmptyState>
+        <section className={ui.card}>
+          <h2 className={ui.cardTitle}>Loop health</h2>
+          <p className="caption" style={{ marginTop: 0 }}>Checks that the learning loop closes, not just that it runs.</p>
+          <table className={ui.table}>
+            <tbody>
+              <tr><td>Corrections stored (before/after pairs)</td><td className={ui.right}>{dis.corrections}</td></tr>
+              <tr><td>Drafts that used past corrections</td><td className={ui.right}>{dis.withMemory} of {dis.drafts}</td></tr>
+              <tr><td>Disagreement score (last {dis.n})</td><td className={ui.right}>{dis.n ? `${Math.round(dis.score * 100)}%` : "n/a"}</td></tr>
+            </tbody>
+          </table>
+        </section>
       </div>
     </>
   );

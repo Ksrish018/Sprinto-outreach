@@ -2,13 +2,14 @@ import Link from "next/link";
 import { EmptyState } from "@/components/EmptyState";
 import { OutcomeTag } from "@/components/OutcomeTag";
 import { PageHeader } from "@/components/PageHeader";
+import { SyncButton } from "@/components/SyncButton";
 import ui from "@/components/ui.module.css";
 import { SPRINTO_FACTS } from "@/lib/draft/check";
 import { getDrafts } from "@/lib/queries";
 import styles from "./drafts.module.css";
 
 const STATUS: Record<string, { label: string; dot: string }> = {
-  drafted: { label: "Ready for Gmail (M5)", dot: ui.dotWarn },
+  drafted: { label: "In the app only", dot: ui.dotWarn },
   in_gmail: { label: "Waiting in Gmail", dot: ui.dotWarn },
   sent_edited: { label: "Sent, edited", dot: ui.dotOk },
   sent_as_is: { label: "Sent as written", dot: ui.dotOk },
@@ -36,7 +37,9 @@ export default async function Drafts({ searchParams }: PageProps<"/drafts">) {
 
   return (
     <>
-      <PageHeader title="Drafts and Why" meta={`${drafts.length} drafts · editing and sending happen in Gmail from M5`} />
+      <PageHeader title="Drafts and Why" meta={`${drafts.length} drafts · edit and send in Gmail; every edit teaches the next draft`}>
+        <SyncButton />
+      </PageHeader>
       <div className={styles.workspace}>
         <nav className={styles.list} aria-label="Drafts">
           {drafts.map((d) => {
