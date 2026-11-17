@@ -1,0 +1,8 @@
+# Never upload secrets or local-only files to Vercel. Production secrets live in Vercel env vars.
+.env
+.env.*
+!.env.example
+test/
+design/
+scripts/dns-fallback.mjs
+*.log

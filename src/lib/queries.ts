@@ -106,3 +106,28 @@ export async function getDossier(companyId: number): Promise<Dossier | null> {
     where company_id = ${companyId} and run_id = ${rc.run_id} order by question_id, id`) as FactRow[];
   return { company, runId: rc.run_id, decision: decision ?? null, facts, timeline: rc.timeline ?? [], stop: { stop_reason: rc.stop_reason, fetches: rc.fetches } };
 }
+
+// ---------------------------------------------------------------- M3: drafts
+
+export type DraftRow = {
+  id: number; company_id: number; run_id: number; domain: string; company: string | null;
+  subject: string; hook: string; body: string; cta: string; status: string; segment: string | null; stage: string | null;
+  pains: { id: string; text: string }[]; claim_map: { claims: { sentence: string; source: string }[]; problems: string[]; attempts: number };
+  contact_name: string | null; contact_title: string | null; contact_email: string | null; pick_reason: string | null; hunter_confidence: number | null;
+  hook_value: string | null; hook_quote: string | null; hook_url: string | null;
+  outcome: string | null; score: number | null; reasons: { text: string; factId: number | null }[] | null;
+  created_at: string;
+};
+
+export async function getDrafts(): Promise<DraftRow[]> {
+  return (await sql()`select dr.id, dr.company_id, dr.run_id, c.domain, c.name as company, dr.subject, dr.hook, dr.body, dr.cta, dr.status,
+      dr.segment, dr.stage, dr.pains, dr.claim_map, ct.name as contact_name, ct.title as contact_title, ct.email as contact_email,
+      ct.pick_reason, ct.hunter_confidence, hf.value as hook_value, hf.quote as hook_quote, hf.source_url as hook_url,
+      d.outcome, d.score, d.reasons, dr.created_at
+    from drafts dr
+    join companies c on c.id = dr.company_id
+    left join contacts ct on ct.id = dr.contact_id
+    left join facts hf on hf.id = dr.hook_fact_id
+    left join decisions d on d.company_id = dr.company_id and d.run_id = dr.run_id
+    order by dr.created_at desc limit 100`) as DraftRow[];
+}

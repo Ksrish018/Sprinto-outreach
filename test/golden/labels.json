@@ -10,20 +10,20 @@
     {
       "domain": "tooljet.com",
       "name": "ToolJet",
-      "label": "go",
-      "evidence": "B2B low-code SaaS, enterprise plan, SOC 2 + ISO 27001 + GDPR (3 frameworks), no competitor trust center found"
+      "label": "no_go",
+      "evidence": "Seed-stage, already holds SOC 2 + ISO 27001 + GDPR, no audit-prep signal. Relabelled 17 Nov by the Growth Lead: keep ICP v1; early companies with enterprise pressure but no audit signal are not Sprinto targets today."
     },
     {
       "domain": "signeasy.com",
       "name": "Signeasy",
-      "label": "go",
-      "evidence": "B2B e-signature SaaS, business and enterprise plans, SOC 2 + HIPAA + GDPR, no competitor trust center found"
+      "label": "no_go",
+      "evidence": "Seed-stage per search, holds SOC 2 + HIPAA, no audit-prep signal. Relabelled 17 Nov by the Growth Lead: keep ICP v1; early companies with enterprise pressure but no audit signal are not Sprinto targets today."
     },
     {
       "domain": "spyne.ai",
       "name": "Spyne",
-      "label": "go",
-      "evidence": "B2B AI imaging SaaS for dealerships, enterprise customers, SOC 2 + GDPR, trust page vendor not visible"
+      "label": "no_go",
+      "evidence": "Series A, holds ISO 27001, no audit-prep or enterprise-pressure signal found. Relabelled 17 Nov by the Growth Lead: keep ICP v1; early companies with enterprise pressure but no audit signal are not Sprinto targets today."
     },
     {
       "domain": "facilio.com",

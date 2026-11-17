@@ -4,6 +4,7 @@ import { env } from "./env";
 import { Gemini } from "./gemini";
 import { domainsInHubspot } from "./hubspot";
 import { record } from "./ledger";
+import { personAndDraft } from "./outreach";
 import { discover, SOURCE_SETS } from "./research/discovery";
 import { parseDomainList } from "./research/domains";
 import { extractFromPage, searchCompany } from "./research/extract";
@@ -175,7 +176,17 @@ export async function processNext(runId: number): Promise<{ domain: string; outc
     const deps = liveDeps(runId, c.domain, c.name ?? c.domain);
     const { result: r, decision: d } = await assess(c.domain, deps, icp);
     await saveResult(runId, c.company_id, r, d);
-    return { domain: c.domain, outcome: d.outcome };
+    let outcome: string = d.outcome;
+    if (d.outcome === "go" || d.outcome === "go_flag") {
+      // Person + draft (steps 4 to 6). A failure here keeps the decision and is shown on the dossier.
+      try {
+        outcome = `${d.outcome}, ${await personAndDraft(runId, c.company_id)}`;
+      } catch (err) {
+        await sql()`update decisions set flags = flags || ${JSON.stringify([`Person or draft step failed: ${(err as Error).message.slice(0, 120)}`])}::jsonb
+          where run_id = ${runId} and company_id = ${c.company_id}`;
+      }
+    }
+    return { domain: c.domain, outcome };
   } catch (err) {
     // One company failing never stops the run (FR-1.5); it is retried up to 3 attempts.
     await sql()`update run_companies set status = case when attempts >= 3 then 'failed' else 'queued' end,
