@@ -1,0 +1,65 @@
+{
+  "_note": "Hand-labelled before running the system, from evidence gathered 17 Nov 2026 with free requests only (site pages, trust subdomains, public job-board APIs). 'go' passes if the system says go or go_flag; 'no_go' passes only on no_go. Labels are proposals for the Growth Lead to confirm. Suppressed domains are never researched, as in a real run (FR-2.4), and count as no_go.",
+  "companies": [
+    {
+      "domain": "appsmith.com",
+      "name": "Appsmith",
+      "label": "no_go",
+      "evidence": "security.appsmith.com is a Drata (SafeBase) trust center: its HTML lists app.drata.com. Corrected 17 Nov from 'go': the first probe never reached that subdomain."
+    },
+    {
+      "domain": "tooljet.com",
+      "name": "ToolJet",
+      "label": "go",
+      "evidence": "B2B low-code SaaS, enterprise plan, SOC 2 + ISO 27001 + GDPR (3 frameworks), no competitor trust center found"
+    },
+    {
+      "domain": "signeasy.com",
+      "name": "Signeasy",
+      "label": "go",
+      "evidence": "B2B e-signature SaaS, business and enterprise plans, SOC 2 + HIPAA + GDPR, no competitor trust center found"
+    },
+    {
+      "domain": "spyne.ai",
+      "name": "Spyne",
+      "label": "go",
+      "evidence": "B2B AI imaging SaaS for dealerships, enterprise customers, SOC 2 + GDPR, trust page vendor not visible"
+    },
+    {
+      "domain": "facilio.com",
+      "name": "Facilio",
+      "label": "go",
+      "evidence": "B2B property-ops SaaS, large real-estate customers, SOC 2 + ISO 27001 + GDPR, no competitor trust center found"
+    },
+    {
+      "domain": "rocketlane.com",
+      "name": "Rocketlane",
+      "label": "no_go",
+      "evidence": "Links to a Sprinto trust center and is a sprinto.com customer story: already a Sprinto customer"
+    },
+    {
+      "domain": "zipy.ai",
+      "name": "Zipy",
+      "label": "no_go",
+      "evidence": "Listed as a customer story on sprinto.com: already a Sprinto customer. (Corrected 17 Nov: the 'Sprinto' text on zipy.ai is Sprinto appearing as a Zipy customer, not a trust center.)"
+    },
+    {
+      "domain": "workos.com",
+      "name": "WorkOS",
+      "label": "no_go",
+      "evidence": "trust.workos.com is run by Vanta (competitor)"
+    },
+    {
+      "domain": "merge.dev",
+      "name": "Merge",
+      "label": "no_go",
+      "evidence": "Trust center on Drata/SafeBase; SOC 2, ISO 27001, HIPAA, GDPR held (4+ frameworks)"
+    },
+    {
+      "domain": "salesforce.com",
+      "name": "Salesforce",
+      "label": "no_go",
+      "evidence": "Public company, tens of thousands of employees"
+    }
+  ]
+}

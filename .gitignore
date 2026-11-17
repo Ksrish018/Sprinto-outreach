@@ -23,3 +23,6 @@ test/fixtures/raw/
 # Logs
 npm-debug.log*
 *.log
+
+# Golden-set output (public company facts, regenerated each run)
+test/golden/last-report.json

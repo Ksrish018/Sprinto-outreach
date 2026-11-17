@@ -52,3 +52,57 @@ export async function getMonthLedger(): Promise<LedgerRow[]> {
   return (await sql()`select api, count(*)::int as calls, coalesce(sum(credits_used), 0)::float as credits
     from api_ledger where at >= date_trunc('month', now()) group by api order by api`) as LedgerRow[];
 }
+
+// ---------------------------------------------------------------- M2: pipeline and dossier
+
+export type RunRow = { id: number; trigger: string; status: string; counts: Record<string, unknown>; started_at: string; finished_at: string | null };
+
+export async function getRun(id?: number): Promise<RunRow | null> {
+  const rows = (id
+    ? await sql()`select id, trigger, status, counts, started_at, finished_at from runs where id = ${id}`
+    : await sql()`select id, trigger, status, counts, started_at, finished_at from runs order by id desc limit 1`) as RunRow[];
+  return rows[0] ?? null;
+}
+
+export type PipelineRow = {
+  company_id: number; domain: string; name: string | null; source: string | null; why_picked: string | null;
+  status: string; stop_reason: string | null; fetches: number; error: string | null;
+  outcome: string | null; score: number | null;
+};
+
+export async function getPipeline(runId: number): Promise<PipelineRow[]> {
+  return (await sql()`select rc.company_id, c.domain, c.name, c.source, c.why_picked, rc.status, rc.stop_reason, rc.fetches, rc.error,
+      d.outcome, d.score
+    from run_companies rc
+    join companies c on c.id = rc.company_id
+    left join decisions d on d.company_id = rc.company_id and d.run_id = rc.run_id
+    where rc.run_id = ${runId}
+    order by case d.outcome when 'go' then 0 when 'go_flag' then 1 when 'human' then 2 when 'no_go' then 3 else 4 end,
+      d.score desc nulls last, c.domain`) as PipelineRow[];
+}
+
+export type FactRow = { id: number; question_id: string; field: string; value: string; quote: string; source_url: string; source_rung: string; verified: boolean };
+export type DossierStep = { source: string; rung: string; why: string; result: string; via?: string; failure?: string | null; facts: number };
+
+export type Dossier = {
+  company: { id: number; domain: string; name: string | null; source: string | null; why_picked: string | null };
+  runId: number | null;
+  decision: { outcome: string; score: number; gates: Record<string, string>; triggers: Record<string, boolean>; reasons: { text: string; factId: number | null }[]; flags: string[] } | null;
+  facts: FactRow[];
+  timeline: DossierStep[];
+  stop: { stop_reason: string | null; fetches: number } | null;
+};
+
+export async function getDossier(companyId: number): Promise<Dossier | null> {
+  const q = sql();
+  const [company] = (await q`select id, domain, name, source, why_picked from companies where id = ${companyId}`) as Dossier["company"][];
+  if (!company) return null;
+  const [rc] = (await q`select run_id, stop_reason, fetches, timeline from run_companies
+    where company_id = ${companyId} and status = 'qualified' order by run_id desc limit 1`) as { run_id: number; stop_reason: string | null; fetches: number; timeline: DossierStep[] }[];
+  if (!rc) return { company, runId: null, decision: null, facts: [], timeline: [], stop: null };
+  const [decision] = (await q`select outcome, score, gates, triggers, reasons, flags from decisions
+    where company_id = ${companyId} and run_id = ${rc.run_id}`) as NonNullable<Dossier["decision"]>[];
+  const facts = (await q`select id, question_id, field, value, quote, source_url, source_rung, verified from facts
+    where company_id = ${companyId} and run_id = ${rc.run_id} order by question_id, id`) as FactRow[];
+  return { company, runId: rc.run_id, decision: decision ?? null, facts, timeline: rc.timeline ?? [], stop: { stop_reason: rc.stop_reason, fetches: rc.fetches } };
+}

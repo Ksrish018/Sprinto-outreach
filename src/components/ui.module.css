@@ -243,3 +243,131 @@
     margin-left: 0;
   }
 }
+
+/* ---- M2 additions ---- */
+
+.tagHuman {
+  background: var(--accent-subtle);
+}
+
+.tagMuted {
+  background: var(--surface2);
+  color: var(--text2);
+}
+
+.tagMono {
+  font-family: var(--font-mono);
+  letter-spacing: 0.04em;
+}
+
+.input {
+  width: 100%;
+  border: 1px solid var(--border-visible);
+  border-radius: var(--radius-component);
+  padding: 10px 12px;
+  font: 400 14px var(--font-sans);
+  color: var(--text1);
+  background: var(--surface1);
+  resize: vertical;
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--focus-ring);
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-sm) var(--space-md);
+}
+
+.notice {
+  font-size: 13px;
+  color: var(--text2);
+  background: var(--surface3);
+  border-radius: var(--radius-component);
+  padding: var(--space-sm) 12px;
+}
+
+.errorText {
+  font-size: 13px;
+  color: var(--error);
+}
+
+.quote {
+  margin-top: var(--space-xs);
+  background: var(--surface3);
+  border-radius: var(--radius-component);
+  padding: var(--space-sm) 10px;
+  color: var(--text2);
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  line-height: 1.45;
+  word-break: break-word;
+}
+
+.link {
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.link:hover {
+  text-decoration: underline;
+}
+
+.split {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 360px;
+  gap: var(--space-lg);
+  align-items: start;
+}
+
+.framed {
+  position: relative;
+}
+
+.framed::before,
+.framed::after,
+.cornerB::before,
+.cornerB::after {
+  content: "";
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-color: var(--accent);
+  border-style: solid;
+}
+
+.framed::before {
+  top: -1px;
+  left: -1px;
+  border-width: 2px 0 0 2px;
+}
+
+.framed::after {
+  top: -1px;
+  right: -1px;
+  border-width: 2px 2px 0 0;
+}
+
+.cornerB::before {
+  bottom: -1px;
+  left: -1px;
+  border-width: 0 0 2px 2px;
+}
+
+.cornerB::after {
+  bottom: -1px;
+  right: -1px;
+  border-width: 0 2px 2px 0;
+}
+
+@media (max-width: 1100px) {
+  .split {
+    grid-template-columns: 1fr;
+  }
+}
