@@ -115,3 +115,46 @@ export function cloudFromJobs(jobs: Job[]): Fact | null {
   }
   return null;
 }
+
+// Deterministic SaaS (Q1) and enterprise (Q5) signals from page text and links. The model is variable
+// run to run; these patterns are not, so the SaaS gate and the enterprise trigger stay stable.
+function lineWith(text: string, re: RegExp): string | null {
+  const line = text.split("\n").find((l) => re.test(l));
+  return line ? line.slice(0, 200) : null;
+}
+
+const PRICE = /([$€£₹]\s?\d[\d,.]*\s*(\/|per)\s*(user|seat|member|month|mo|builder|editor)\b)|\bper (user|seat) (per|\/) month\b|\bbilled (annually|monthly)\b/i;
+const DEMO = /\b(book a demo|request a demo|schedule a demo|get a demo|talk to sales|start (a |your )?free trial|try (it )?for free|start for free|get started for free)\b/i;
+const SSO = /\b(saml|single sign-on|sso|scim)\b/i;
+const ENTERPRISE_TIER = /\benterprise\b[^\n]{0,60}\b(plan|tier|edition|pricing|contact (us|sales)|custom pricing)\b|\b(plan|tier|edition)\b[^\n]{0,20}\benterprise\b/i;
+
+export function signalFacts(text: string, links: Link[], url: string, domain: string): Fact[] {
+  const out: Fact[] = [];
+  const add = (question: Fact["question"], field: string, value: string, quote: string) =>
+    out.push({ question, field, value, quote, sourceUrl: url, rung: "scrape", verified: true });
+
+  const price = lineWith(text, PRICE);
+  if (price) add("Q1", "pricing_plans", "priced per user, seat or month", price);
+
+  const demoLink = links.find((l) => DEMO.test(l.text));
+  const demoText = lineWith(text, DEMO);
+  if (demoLink) add("Q1", "demo_or_trial", demoLink.text, `${demoLink.text} (${demoLink.href})`);
+  else if (demoText) add("Q1", "demo_or_trial", "demo or trial offered", demoText);
+
+  const root = domain.replace(/^www\./, "");
+  const login = links.find((l) => {
+    try {
+      const h = new URL(l.href).hostname;
+      return h.endsWith(root) && (/^(app|dashboard|console|portal|my)\./.test(h) || /^(log ?in|sign ?in)$/i.test(l.text.trim()));
+    } catch {
+      return false;
+    }
+  });
+  if (login) add("Q1", "app_login", new URL(login.href).hostname, `${login.text || "login"} (${login.href})`);
+
+  const sso = lineWith(text, SSO);
+  if (sso) add("Q5", "sso_saml", "offers SSO / SAML", sso);
+  const ent = lineWith(text, ENTERPRISE_TIER);
+  if (ent) add("Q5", "enterprise_tier", "enterprise plan", ent);
+  return out;
+}

@@ -116,13 +116,20 @@ export function qualify(facts: Fact[], w: Weights, t: Thresholds): Decision {
 
   const base = { score, gates: { saas, not_served: notServed, size }, triggers: { audit_prep: Boolean(audit), enterprise_pressure: enterprise }, reasons };
 
-  // The 'one unknown' rule.
-  if (saas !== "pass" || size !== "pass") {
-    const missing = [saas !== "pass" && "SaaS signals", size !== "pass" && "headcount"].filter(Boolean).join(" and ");
-    return { ...base, outcome: "human", flags: [...flags, `Gate not proven: ${missing}`], nearMiss: false };
-  }
+  // A company that cannot be Go whatever the open questions turn out to be is a No-go, not a human's job:
+  // no trigger, or a score that stays below the Go line even if every unknown score item came back positive.
+  const potential = score + (unknown.includes("funding stage") ? w.funding_a_to_c : 0) + (unknown.includes("client size") ? w.client_size : 0) +
+    (unknown.includes("industry") ? w.regulated_industry : 0) + (unknown.includes("geography") ? w.geography : 0);
   if (!audit && !enterprise) {
     return { ...base, outcome: "no_go", reasons: [...reasons, { text: "No reason to buy now: no audit prep or enterprise pressure found" }], flags, nearMiss: false };
+  }
+  // The 'one unknown' rule: an unproven gate only matters when the company could otherwise be Go.
+  if (saas !== "pass" || size !== "pass") {
+    const missing = [saas !== "pass" && "SaaS signals", size !== "pass" && "headcount"].filter(Boolean).join(" and ");
+    if (potential < t.go_score) {
+      return { ...base, outcome: "no_go", reasons: [...reasons, { text: `Score ${score} cannot reach ${t.go_score} even if the open questions resolve` }], flags: [...flags, `Gate not proven: ${missing}`], nearMiss: false };
+    }
+    return { ...base, outcome: "human", flags: [...flags, `Gate not proven: ${missing}`], nearMiss: false };
   }
   if (score >= t.go_score) {
     if (unknown.length) return { ...base, outcome: "go_flag", flags: [...flags, `Unknown: ${unknown.join(", ")}`], nearMiss: false };

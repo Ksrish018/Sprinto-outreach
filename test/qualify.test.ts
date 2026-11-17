@@ -95,3 +95,18 @@ describe("Evidence Map rules", () => {
     expect(shortCircuit([...SAAS, ...SIZE])).toBeNull();
   });
 });
+
+describe("No-go beats Human review when Go is impossible", () => {
+  it("an unproven gate with no trigger is No-go, not human", () => {
+    expect(qualify([...SIZE, ...FULL_SCORE], W, T).outcome).toBe("no_go");
+  });
+  it("an unproven gate with a trigger but no path to 50 is No-go", () => {
+    const d = qualify([...SIZE, f("Q5", "sso_saml", "yes"), f("Q6", "funding_round", "Seed"), f("Q7", "industry", "other"), f("Q7", "client_size", "no"), f("Q8", "geography", "US")], W, T);
+    expect(d.score).toBeLessThan(50);
+    expect(d.outcome).toBe("no_go");
+    expect(d.reasons.at(-1)?.text).toMatch(/cannot reach/);
+  });
+  it("an unproven gate on a company that could be Go still goes to a human", () => {
+    expect(qualify([...SIZE, ...AUDIT, ...FULL_SCORE], W, T).outcome).toBe("human");
+  });
+});

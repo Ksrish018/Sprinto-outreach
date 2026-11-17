@@ -2,7 +2,7 @@
 // The model reads and fills fields; code decides when there is enough.
 import type { Link } from "./clean";
 import type { FailureReason } from "./classify";
-import { type Board, type Job, boardPublicUrl, boardUrl, boardsFromLinks, cloudFromJobs, complianceJobFacts, parseJobs, trustToolFromLinks } from "./detect";
+import { type Board, type Job, boardPublicUrl, boardUrl, boardsFromLinks, cloudFromJobs, complianceJobFacts, parseJobs, signalFacts, trustToolFromLinks } from "./detect";
 import { type Fact, PRIORITY, type QuestionId, type Rung, type SearchState, TRIES, isAnswered, shortCircuit } from "./evidence";
 
 export type PageOut = {
@@ -39,7 +39,8 @@ export type ResearchResult = {
   pages: PageOut[];
 };
 
-export const LIMITS = { maxFetches: 15, maxMs: 120_000 };
+// 15 fetches and 3 minutes: Gemini's grounded search alone can take a minute, so 2 minutes cut research short.
+export const LIMITS = { maxFetches: 15, maxMs: 180_000 };
 
 // Where each question usually lives, own pages first (Evidence Map column 3).
 const PATHS: Record<QuestionId, string[]> = {
@@ -54,7 +55,7 @@ const PATHS: Record<QuestionId, string[]> = {
 };
 const KEYWORDS: Record<QuestionId, RegExp> = {
   Q1: /pricing|plans/i,
-  Q2: /security|trust|compliance|soc ?2|privacy center/i,
+  Q2: /^\/?(security|trust)|trust center|security center|privacy center/i,
   Q3: /about|company|team/i,
   Q4: /careers|jobs|join us|hiring|work with us/i,
   Q5: /customers|case stud|enterprise|success stor/i,
@@ -163,6 +164,9 @@ export async function research(domain: string, deps: LoopDeps, limits = LIMITS, 
         found++;
       }
       if (isTrustAddress) state.trustPageRead = true;
+      const sig = signalFacts(p.text, p.links, url, domain);
+      add(sig);
+      found += sig.length;
       const q = open();
       if (q.length) {
         // A failed model call costs this page, never the company (FR-1.5).

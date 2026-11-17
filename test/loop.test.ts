@@ -102,3 +102,17 @@ describe("Q4 detector", async () => {
     expect(facts[0].value).toMatch(/ISO 27001/);
   });
 });
+
+describe("deterministic SaaS and enterprise signals", async () => {
+  const { signalFacts } = await import("@/lib/research/detect");
+  const text = "Team $29 per user / month billed annually\nEnterprise plan with custom pricing, contact sales\nSecure sign in with SAML SSO and SCIM";
+  const links = [{ href: "https://acme.io/demo", text: "Book a demo" }, { href: "https://app.acme.io/login", text: "Log in" }];
+  const facts = signalFacts(text, links, "https://acme.io/pricing", "acme.io");
+  it("finds pricing, demo, login, SSO and an enterprise tier from code alone", () => {
+    expect(facts.map((x) => x.field).sort()).toEqual(["app_login", "demo_or_trial", "enterprise_tier", "pricing_plans", "sso_saml"]);
+    expect(facts.every((x) => x.verified)).toBe(true);
+  });
+  it("does not invent signals on a plain page", () => {
+    expect(signalFacts("We are a design studio based in Lisbon working with brands.", [], "https://studio.pt/", "studio.pt")).toHaveLength(0);
+  });
+});
