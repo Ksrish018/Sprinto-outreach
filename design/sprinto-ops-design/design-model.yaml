@@ -1,0 +1,185 @@
+name: "Sprinto Ops"
+philosophy: "A trust company's back office. Deep plum authority on warm cream paper, one lime spark reserved for the moment something is proven. Calm enough to review twenty emails in a row; precise enough to defend every one."
+primary_mode: "light"
+brand_domain: "B2B compliance automation; internal outbound-pipeline console for a Growth Lead"
+brand_type: "ui-rich"
+mono_for_code: true      # URLs, domains, source quotes, IDs
+mono_for_metrics: false  # Sprinto keeps numbers in Instrument Sans
+
+# Observed on sprinto.com (built-in browser, computed styles, 2026-11-03):
+#   body font "Instrument Sans" 18px, all headings weight 500-700 with negative tracking
+#   plum #650A41 (CTA bg, accent text, full-bleed sections) / #670A42 (lilac-pill text)
+#   cream #FCF7F5 section bg, #F6F5F2 alt, salmon #FAE8E1 / #FCF2EE tag+section tints
+#   lilac #EBE2FE secondary pill bg, lime #DCF07F / #D1E85D highlight on plum, orange #FD8C25 rare
+#   text #141012 / #443E41 / #393336, on-dark #C7C4C6 and rgba(255,255,255,.7)
+#   radii: 8px (most), 12px cards, 100px all CTAs, 20-24px large panels, 3px tags
+#   shadow: 0 1px 7px rgba(35,31,32,.04), 0 0 1px rgba(127,126,106,.24)
+#   motifs: hairline grid rules with plum corner crop-marks; uppercase micro-tags on salmon;
+#           a pixel-block band of lime / lilac / salmon / magenta squares
+
+primitives:
+  colors:
+    neutral:   # warm, slightly rosy (matches cream + plum-tinted greys)
+      50: "#FCF7F5"
+      100: "#F6F5F2"
+      200: "#EDE7E4"
+      300: "#DDD5D2"
+      400: "#BFBABD"
+      500: "#8C8487"
+      600: "#5E5759"
+      700: "#443E41"
+      800: "#2B2528"
+      900: "#141012"
+      950: "#0C090A"
+    brand:     # plum, 500 = observed CTA
+      50: "#FBF0F5"
+      100: "#F5DCE8"
+      200: "#E9B6CF"
+      300: "#D486AE"
+      400: "#B24E85"
+      500: "#650A41"
+      600: "#560837"
+      700: "#46062D"
+      800: "#370523"
+      900: "#280319"
+      950: "#1A0210"
+    lilac: { 50: "#F7F3FF", 100: "#EBE2FE", 500: "#8E6FE0", 900: "#2E2350" }
+    lime:  { 100: "#F2F9D3", 300: "#DCF07F", 500: "#B9D23A", 900: "#3A4410" }
+    salmon: { 50: "#FCF2EE", 100: "#FAE8E1", 500: "#E07A5F" }
+    red:   { 50: "#FDF1F1", 500: "#C8323B", 900: "#5C1418" }
+    green: { 50: "#EFF8F1", 500: "#2E8B57", 900: "#123A24" }
+    amber: { 50: "#FFF6EA", 500: "#D9821E", 900: "#5A3409" }
+  spacing: [0, 2, 4, 8, 12, 16, 24, 32, 48, 64, 96]
+  radii: [0, 4, 8, 12, 24, 999]
+
+tokens:
+  colors:
+    light:
+      background: "{neutral.50}"
+      surface1: "#FFFFFF"
+      surface2: "{neutral.100}"
+      surface3: "{salmon.50}"
+      border: "{neutral.200}"
+      border_visible: "{neutral.300}"
+      text1: "{neutral.900}"
+      text2: "{neutral.700}"
+      text3: "{neutral.500}"
+      text4: "{neutral.400}"
+      accent: "{brand.500}"
+      accent_subtle: "{lilac.100}"
+      highlight: "{lime.300}"        # only on plum surfaces: "proven" moments
+      tag_bg: "{salmon.100}"
+    dark:
+      background: "{brand.950}"
+      surface1: "{brand.900}"
+      surface2: "{brand.800}"
+      surface3: "{brand.700}"
+      border: "{brand.800}"
+      border_visible: "{brand.700}"
+      text1: "{neutral.50}"
+      text2: "{neutral.400}"
+      text3: "{neutral.500}"
+      text4: "{neutral.600}"
+      accent: "{lime.300}"
+      accent_subtle: "{brand.800}"
+      highlight: "{lime.300}"
+      tag_bg: "{brand.800}"
+    success: "{green.500}"
+    warning: "{amber.500}"
+    error: "{red.500}"
+    success_bg: { light: "{green.50}", dark: "{green.900}" }
+    warning_bg: { light: "{amber.50}", dark: "{amber.900}" }
+    error_bg:   { light: "{red.50}",   dark: "{red.900}" }
+
+  spacing: { 2xs: 2, xs: 4, sm: 8, md: 16, lg: 24, xl: 32, 2xl: 48, 3xl: 64, 4xl: 96 }
+
+  radii:
+    element: 4      # tags, checkboxes (observed 3px, rounded to grid)
+    control: 999    # every button and segmented control is a pill (observed 100px)
+    component: 8    # inputs, table rows, small cards (most common observed value)
+    container: 12   # cards, drawers, modals
+    panel: 24       # large hero / kill-switch banner panels
+
+  typography:
+    display: { family: "Instrument Sans", size: "36px", weight: 500, line_height: 1.1, letter_spacing: "-0.03em" }
+    body:    { family: "Instrument Sans", size: "15px", weight: 400, line_height: 1.5 }
+    mono:    { family: "IBM Plex Mono", size: "12.5px", weight: 400 }
+    scale:
+      display:    [36, 1.1, "-0.03em", 500, "page titles (Review queue, Run #14)"]
+      heading:    [24, 1.15, "-0.02em", 500, "section titles, company name in dossier"]
+      subheading: [18, 1.3, "-0.01em", 600, "card titles, email subject"]
+      body:       [15, 1.5, "0", 400, "email body, reasons, table cells"]
+      body_sm:    [13, 1.45, "0", 400, "secondary meta, source captions"]
+      caption:    [12, 1.4, "0", 400, "timestamps, helper text"]
+      label:      [11, 1.2, "0.08em", 600, "UPPERCASE micro-tags and column headers"]
+
+  elevation:
+    strategy: "subtle"
+    card: "0 1px 7px rgba(35,31,32,.04), 0 0 1px rgba(127,126,106,.24)"
+    overlay: "0 1px 6px rgba(0,0,0,.06), 0 2px 32px rgba(0,0,0,.16)"
+
+  motion:
+    personality: "smooth"
+    easing: "cubic-bezier(.2,.7,.2,1)"
+    duration_fast: "140ms"
+    duration_normal: "240ms"
+
+  hero_stage:
+    preset: "flat-blank"
+    observed_style:
+      description: "Full-bleed flat plum field, centred cream headline with the brand word picked out in lime, white pill CTA. No subject, no gradient. Below the fold, a band of pixel blocks (lime, lilac, salmon, magenta) acts as the only ornament."
+      where_used: ["marketing hero", "section breaks"]
+    background:
+      medium: "absent"
+      color_mode: "monochrome"
+      saturation: "muted"
+      light_source: "none"
+      falloff: "hard"
+      vignette: "off"
+      texture: "clean"
+      motion: "static"
+      intensity: "subtle"
+      safe_zone: "full-bleed"
+      color_palette: ["#650A41", "#DCF07F", "#EBE2FE", "#FAE8E1", "#FCF7F5"]
+    hero:
+      subject: "none"
+    relation:
+      type: "flat"
+      bleed: 0
+    app_usage: "The console uses the plum field only for the run header and the kill-switch banner; everything else sits on cream."
+    disclaimer: "Pixel-block band approximated with CSS squares. Sprinto's illustrations and logo are proprietary and not reproduced."
+
+  iconography:
+    observed_style:
+      description: "Thin outline UI icons (~1.5px) with rounded terminals: calendar on the demo CTA, chevrons on accordions, hamburger. Plain, humanist, never filled."
+      stroke_weight: "regular"
+      corner_treatment: "soft"
+      fill_style: "outline"
+      form_language: "humanist"
+      visual_density: "minimal"
+    fallback_kit:
+      name: "Phosphor"
+      weight: "regular"
+      match_score: "high"
+      match_reasoning: "Phosphor regular matches the ~1.5px stroke, rounded terminals and outline-only style of Sprinto's chevrons and calendar glyph. Lucide was second, but its 2px stroke reads heavier than Sprinto's hairline UI."
+      cdn: "https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css"
+      icon_class_prefix: "ph ph-"
+    disclaimer: "Icons are a best-match fallback from Phosphor, not Sprinto's own icon set."
+
+components:
+  button_primary:   { source: "observed", background: "{brand.500}", color: "#FFFFFF", padding: "10px 20px", radius: "{radii.control}", font_weight: 500, font_size: "15px", hover: { background: "{brand.600}" } }
+  button_on_plum:   { source: "observed", background: "#FFFFFF", color: "{brand.500}", padding: "10px 20px", radius: "{radii.control}", font_weight: 500 }
+  button_secondary: { source: "observed", background: "{lilac.100}", color: "{brand.500}", padding: "8px 16px", radius: "{radii.control}", font_weight: 500 }
+  button_ghost:     { source: "observed", background: "transparent", color: "{brand.500}", padding: "8px 4px", radius: 0, font_weight: 500, underline_on_hover: true }
+  button_danger:    { source: "derived", background: "{red.500}", color: "#FFFFFF", radius: "{radii.control}", justified_by: "pill controls everywhere; red reserved for kill switch only" }
+  tag:              { source: "observed", background: "{salmon.100}", color: "{brand.500}", radius: "{radii.element}", padding: "2px 8px", type: "label" }
+  card:             { source: "observed", background: "#FFFFFF", border: "1px solid {neutral.200}", radius: "{radii.container}", shadow: "{elevation.card}", padding: "24px" }
+  grid_frame:       { source: "observed", border: "1px solid {neutral.200}", corner_marks: "8px plum L-brackets at the 4 corners" }
+  input:            { source: "derived", background: "#FFFFFF", border: "1px solid {neutral.300}", radius: "{radii.component}", focus: "2px ring {brand.200}", justified_by: "8px is Sprinto's dominant radius" }
+  table:            { source: "derived", row_height: 48, header: "label style on {neutral.100}", hover: "{salmon.50}", selected: "{lilac.50} + 2px plum left rule" }
+
+app_screen:
+  archetype: "list-detail"
+  frame: "browser"
+  frame_params: { url: "outreach.sprinto.internal/drafts", title: "Sprinto Outreach, Drafts and Why" }
+  content_seed: "Monday run 14: 20 companies found, 9 Go, 9 Gmail drafts with the Why panel and past corrections beside each"

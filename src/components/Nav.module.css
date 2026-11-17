@@ -1,0 +1,77 @@
+.rail {
+  border-right: 1px solid var(--border);
+  padding: var(--space-lg) 12px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  background: var(--background);
+  position: sticky;
+  top: 0;
+  height: 100vh;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  padding: 0 10px var(--space-lg);
+}
+
+.brandIcon {
+  color: var(--accent);
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: var(--space-sm) 10px;
+  border-left: 2px solid transparent;
+  border-radius: var(--radius-component);
+  color: var(--text2);
+  font-size: 14px;
+  text-decoration: none;
+  transition: background var(--duration-fast) var(--ease);
+}
+
+.item:hover {
+  background: var(--surface3);
+}
+
+.active {
+  color: var(--accent);
+  font-weight: 600;
+  border-left-color: var(--accent);
+  border-radius: 0 var(--radius-component) var(--radius-component) 0;
+  background: var(--surface3);
+}
+
+.foot {
+  margin: auto 0 0;
+  padding: 12px 10px;
+  font-size: 12px;
+  color: var(--text3);
+}
+
+@media (max-width: 900px) {
+  .rail {
+    position: static;
+    height: auto;
+    flex-direction: row;
+    flex-wrap: wrap;
+    border-right: 0;
+    border-bottom: 1px solid var(--border);
+    padding: 12px var(--space-md);
+  }
+
+  .brand {
+    width: 100%;
+    padding-bottom: var(--space-sm);
+  }
+
+  .foot {
+    display: none;
+  }
+}

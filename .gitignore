@@ -1,0 +1,25 @@
+# Secrets: never commit. Only .env.example (names, no values) is tracked.
+.env
+.env.*
+!.env.example
+
+# Dependencies and build output
+node_modules/
+.next/
+out/
+build/
+coverage/
+*.tsbuildinfo
+next-env.d.ts
+
+# Platform
+.vercel/
+__pycache__/
+.DS_Store
+
+# Recorded API responses may contain real data; only scrubbed fixtures are committed
+test/fixtures/raw/
+
+# Logs
+npm-debug.log*
+*.log

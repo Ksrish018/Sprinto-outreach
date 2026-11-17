@@ -1,0 +1,109 @@
+/* Sprinto Ops design tokens. Source of truth: design/sprinto-ops-design/design-model.yaml.
+   Components reference these variables only; no hex values elsewhere. */
+:root {
+  --font-sans: var(--font-instrument), system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: var(--font-plex-mono), ui-monospace, Consolas, monospace;
+
+  --background: #FCF7F5;
+  --bg: var(--background);
+  --surface1: #FFFFFF;
+  --surface2: #F6F5F2;
+  --surface3: #FCF2EE;
+  --border: #EDE7E4;
+  --border-visible: #DDD5D2;
+  --text1: #141012;
+  --text2: #443E41;
+  --text3: #8C8487;
+  --text4: #BFBABD;
+  --accent: #650A41;
+  --accent-hover: #560837;
+  --accent-subtle: #EBE2FE;
+  --on-accent: #FFFFFF;
+  --highlight: #DCF07F;
+  --highlight-edge: #B9D23A;
+  --tag-bg: #FAE8E1;
+  --plum-field: #650A41;
+  --plum: #650A41;
+  --on-plum: #FCF7F5;
+  --on-plum-muted: rgba(252, 247, 245, 0.72);
+  --success: #2E8B57;
+  --warning: #D9821E;
+  --error: #C8323B;
+  --success-bg: #EFF8F1;
+  --warning-bg: #FFF6EA;
+  --error-bg: #FDF1F1;
+  --memory: #E8912D;
+  --memory-bg: #FFF1E3;
+  --focus-ring: #E9B6CF;
+
+  --space-2xs: 2px;
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --space-2xl: 48px;
+  --space-3xl: 64px;
+
+  --radius-element: 4px;
+  --radius-control: 999px;
+  --radius-component: 8px;
+  --radius-container: 12px;
+  --radius-panel: 24px;
+
+  --shadow-card: 0 1px 7px rgba(35, 31, 32, 0.04), 0 0 1px rgba(127, 126, 106, 0.24);
+  --shadow-overlay: 0 1px 6px rgba(0, 0, 0, 0.06), 0 2px 32px rgba(0, 0, 0, 0.16);
+
+  --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --duration-fast: 140ms;
+  --duration-normal: 240ms;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --background: #1A0210;
+    --surface1: #280319;
+    --surface2: #370523;
+    --surface3: #46062D;
+    --border: #370523;
+    --border-visible: #46062D;
+    --text1: #FCF7F5;
+    --text2: #BFBABD;
+    --text3: #8C8487;
+    --text4: #5E5759;
+    --accent: #DCF07F;
+    --accent-hover: #B9D23A;
+    --accent-subtle: #370523;
+    --on-accent: #1A0210;
+    --tag-bg: #370523;
+    --plum-field: #46062D;
+    --success-bg: #123A24;
+    --warning-bg: #5A3409;
+    --error-bg: #5C1418;
+    --memory-bg: #3A2208;
+    --shadow-card: 0 0 0 1px #370523;
+  }
+}
+:root[data-theme="dark"] {
+  --background: #1A0210;
+  --surface1: #280319;
+  --surface2: #370523;
+  --surface3: #46062D;
+  --border: #370523;
+  --border-visible: #46062D;
+  --text1: #FCF7F5;
+  --text2: #BFBABD;
+  --text3: #8C8487;
+  --text4: #5E5759;
+  --accent: #DCF07F;
+  --accent-hover: #B9D23A;
+  --accent-subtle: #370523;
+  --on-accent: #1A0210;
+  --tag-bg: #370523;
+  --plum-field: #46062D;
+  --success-bg: #123A24;
+  --warning-bg: #5A3409;
+  --error-bg: #5C1418;
+  --memory-bg: #3A2208;
+  --shadow-card: 0 0 0 1px #370523;
+}

@@ -1,0 +1,245 @@
+/* Shared primitives from design/sprinto-ops-design/references/components.md */
+
+.page {
+  padding: var(--space-xl);
+  display: grid;
+  gap: var(--space-lg);
+  align-content: start;
+}
+
+.header {
+  background: var(--plum-field);
+  color: var(--on-plum);
+  padding: var(--space-lg) var(--space-xl);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-lg);
+}
+
+.title {
+  margin: 0;
+  font-size: 36px;
+  font-weight: 500;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+}
+
+.title em {
+  font-style: normal;
+  color: var(--highlight);
+}
+
+.headerMeta {
+  margin-top: 6px;
+  font-size: 13px;
+  color: var(--on-plum-muted);
+}
+
+.stats {
+  display: flex;
+  gap: 28px;
+  margin-left: auto;
+}
+
+.stat b {
+  display: block;
+  font-size: 24px;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+.stat span {
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--on-plum-muted);
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-sm);
+  white-space: nowrap;
+  border: 0;
+  border-radius: var(--radius-control);
+  font: 500 15px var(--font-sans);
+  padding: 10px 20px;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background var(--duration-fast) var(--ease);
+}
+
+.btnPrimary {
+  background: var(--accent);
+  color: var(--on-accent);
+}
+
+.btnPrimary:hover {
+  background: var(--accent-hover);
+}
+
+.btnSecondary {
+  background: var(--accent-subtle);
+  color: var(--accent);
+  padding: var(--space-sm) var(--space-md);
+  font-size: 14px;
+}
+
+.btnOnPlum {
+  background: #FFFFFF;
+  color: var(--plum);
+}
+
+.btn[aria-disabled="true"] {
+  opacity: 0.4;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: var(--space-lg);
+}
+
+.card {
+  background: var(--surface1);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-container);
+  box-shadow: var(--shadow-card);
+  padding: var(--space-lg);
+}
+
+.cardTitle {
+  margin: 0 0 var(--space-xs);
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.sectionTitle {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+}
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--tag-bg);
+  color: var(--accent);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 2px var(--space-sm);
+  border-radius: var(--radius-element);
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+  flex: none;
+}
+
+.dotOk {
+  background: var(--highlight);
+  box-shadow: 0 0 0 1px var(--highlight-edge);
+}
+
+.dotWarn {
+  background: var(--warning);
+}
+
+.dotError {
+  background: var(--error);
+}
+
+.dotMuted {
+  background: var(--text4);
+}
+
+.empty {
+  text-align: center;
+  padding: var(--space-3xl) var(--space-lg);
+}
+
+.empty h2 {
+  margin: 0 0 var(--space-xs);
+  font-size: 24px;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+}
+
+.empty p {
+  margin: 0 auto var(--space-md);
+  max-width: 460px;
+  color: var(--text2);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.table th {
+  text-align: left;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text3);
+  background: var(--surface2);
+  padding: 10px 12px;
+}
+
+.table td {
+  padding: 12px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text2);
+  vertical-align: top;
+}
+
+.table td.right,
+.table th.right {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.killBanner {
+  margin: var(--space-md) var(--space-xl) 0;
+  background: var(--plum-field);
+  color: var(--on-plum);
+  border-radius: var(--radius-panel);
+  padding: 20px var(--space-lg);
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+.killBanner p {
+  margin: 2px 0 0;
+  font-size: 13px;
+  color: var(--on-plum-muted);
+}
+
+@media (max-width: 900px) {
+  .page {
+    padding: var(--space-md);
+  }
+
+  .header {
+    padding: 20px var(--space-md);
+  }
+
+  .stats {
+    margin-left: 0;
+  }
+}
