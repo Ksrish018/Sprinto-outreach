@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { ApproveButton } from "@/components/ApproveButton";
 import { EmptyState } from "@/components/EmptyState";
 import { OutcomeTag, RungTag } from "@/components/OutcomeTag";
 import { PageHeader } from "@/components/PageHeader";
@@ -81,6 +82,7 @@ export default async function Company({ params }: PageProps<"/companies/[id]">) 
                 <span className="num" style={{ fontSize: 24, fontWeight: 500 }}>{d.decision.score}</span>
                 <span className="caption">of 100</span>
               </div>
+              {d.decision.outcome === "human" && <ApproveButton companyId={id} />}
               <span className="label" style={{ color: "var(--text3)" }}>Gates</span>
               <ul style={{ listStyle: "none", padding: 0, margin: "6px 0 16px", display: "grid", gap: 6 }}>
                 {Object.entries(d.decision.gates).map(([k, v]) => (
