@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { composeEmail, delta, disagreement, editRatio, splitSent } from "@/lib/memory/diff";
+import { OPT_OUT, composeEmail, delta, disagreement, editRatio, splitSent } from "@/lib/memory/diff";
 
 const parts = {
   hook: "Hi Maya, I saw Acme is hiring a GRC Analyst.",
@@ -19,6 +19,19 @@ describe("capture: draft vs sent (FR-13.1)", () => {
     const d = delta(parts, splitSent(sent));
     expect(d.changed).toEqual(["cta"]);
     expect(d.cta).toBeGreaterThan(0.5);
+  });
+
+  it("signs with a person and ends with an opt-out line, neither of which counts as an edit", () => {
+    const sent = composeEmail("Pilot: x", parts, "Asha Rao");
+    expect(sent).toContain(["Asha Rao", "Growth, Sprinto"].join(String.fromCharCode(10)));
+    expect(sent.trim().endsWith(OPT_OUT)).toBe(true);
+    expect(delta(parts, splitSent(sent)).changed).toEqual([]);
+    expect(delta(parts, splitSent(sent.replace("Asha Rao", "Asha"))).changed).toEqual([]);
+  });
+
+  it("still reads emails sent with the old team signature", () => {
+    const old = ["Pilot: x", "", parts.hook, "", parts.body, "", parts.cta, "", "Best,", "Sprinto Growth Team"].join(String.fromCharCode(10));
+    expect(delta(parts, splitSent(old)).changed).toEqual([]);
   });
 
   it("edit ratio is 0 for identical text and 1 for a full rewrite", () => {

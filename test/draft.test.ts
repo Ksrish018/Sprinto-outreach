@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { checkDraft } from "@/lib/draft/check";
+import { checkDraft, subjectNamesHook } from "@/lib/draft/check";
 import { pickPains } from "@/lib/draft/pains";
 import { type DraftFact, pickHook } from "@/lib/draft/write";
 import { Hunter, QuotaError, acceptable, parseEmails } from "@/lib/people/hunter";
@@ -116,5 +116,16 @@ describe("draft checks and claim checker (FR-7.1, FR-7.3)", () => {
   });
   it("enforces 60 to 120 words", () => {
     expect(checkDraft({ ...good, body: "Short body." }, ctx).problems.join()).toMatch(/words/);
+  });
+  it("blocks a generic subject when the hook is known", () => {
+    const hooked = { ...ctx, hookValue: "Hiring: GRC Analyst" };
+    expect(checkDraft(good, hooked).ok).toBe(true);
+    expect(checkDraft({ ...good, subject: "Compliance automation for Acme" }, hooked).problems.join()).toMatch(/Subject is generic/);
+    expect(subjectNamesHook("Your Compliance Advisory Manager hire", "Hiring: Compliance Advisory Manager")).toBe(true);
+    expect(subjectNamesHook("Compliance automation for Griffin", "Hiring: Compliance Advisory Manager")).toBe(false);
+  });
+  it("allows at most one Sprinto fact, so the email is not a brochure", () => {
+    const r = checkDraft({ ...good, claims: [...good.claims, { sentence: "Sprinto automates SOC 2, ISO 27001 and more", source: "S1" }] }, ctx);
+    expect(r.problems.join()).toMatch(/More than one Sprinto fact/);
   });
 });

@@ -14,6 +14,7 @@ const schema = z.object({
   GMAIL_CLIENT_SECRET: z.string().min(1),
   GMAIL_REFRESH_TOKEN: z.string().min(1),
   SEND_TO_EMAIL: z.email(),
+  SENDER_NAME: z.string().trim().min(1).optional(), // who signs the email; not a secret
   CRON_SECRET: z.string().min(24),
   LIVE_APIS: z.enum(["on", "off"]).default("off"),
 });

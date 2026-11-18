@@ -21,7 +21,16 @@ const SPAM = /\b(guarantee[d]?|free money|act now|limited time|100% free|risk[- 
 
 export type CheckResult = { ok: boolean; problems: string[] };
 
-export function checkDraft(d: Draft, ctx: { firstName: string; factIds: Set<string> }): CheckResult {
+// Words that do not make a subject specific: a subject must name something from the hook fact itself.
+const GENERIC = new Set(["compliance", "automation", "automate", "automated", "sprinto", "your", "with", "from", "about", "that", "this", "team", "hiring", "quick", "question", "idea", "help"]);
+const content = (s: string) => s.toLowerCase().split(/[^\p{L}\p{N}]+/u).filter((w) => w.length >= 4 && !GENERIC.has(w));
+
+export function subjectNamesHook(subject: string, hookValue: string): boolean {
+  const hook = content(hookValue);
+  return content(subject).some((w) => hook.some((h) => h.startsWith(w.slice(0, 5)) || w.startsWith(h.slice(0, 5))));
+}
+
+export function checkDraft(d: Draft, ctx: { firstName: string; factIds: Set<string>; hookValue?: string }): CheckResult {
   const problems: string[] = [];
   const all = [d.subject, d.hook, d.body, d.cta].join(" ");
   const words = [d.hook, d.body, d.cta].join(" ").split(/\s+/).filter(Boolean).length;
@@ -33,6 +42,8 @@ export function checkDraft(d: Draft, ctx: { firstName: string; factIds: Set<stri
   if ((d.cta.match(/\?/g) ?? []).length !== 1 || /\?/.test(d.hook + d.body)) problems.push("Needs exactly one question, in the call to action");
   if (SPAM.test(all)) problems.push("Contains spam-trigger wording");
   if (/—/.test(all)) problems.push("Contains an em-dash");
+  if (ctx.hookValue && !subjectNamesHook(d.subject, ctx.hookValue)) problems.push(`Subject is generic: name the hook itself (${ctx.hookValue})`);
+  if (d.claims.filter((c) => c.source in SPRINTO_FACTS).length > 1) problems.push("More than one Sprinto fact: keep only the one that answers the first pain");
 
   // Claim checker: every factual sentence maps to a stored, verified fact or to a Sprinto fact.
   if (!d.claims.length) problems.push("No claims mapped to sources");

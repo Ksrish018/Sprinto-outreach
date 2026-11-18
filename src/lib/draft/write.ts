@@ -52,9 +52,9 @@ Sprinto automates compliance certification (SOC 2, ISO 27001, GDPR, HIPAA). Writ
 
 Rules:
 - hook: one sentence that greets ${i.person.firstName} by first name and names this specific fact: ${i.hook.id} = ${i.hook.value} ("${i.hook.quote}").
-- body: two to three sentences tying the two pains below to what Sprinto does. Only use the facts listed. Never invent numbers, customers or events.
+- body: two to three sentences. First the two pains below, in ${i.person.firstName}'s own terms. Then at most ONE Sprinto fact: the one that best answers the first pain. Never list frameworks or features. Only use the facts listed. Never invent numbers, customers or events.
 - cta: one short question asking for a 15-minute call next week. The only question mark in the email.
-- subject: at most 7 words, no clickbait.
+- subject: 3 to 7 words naming the hook fact itself (for example "Your Compliance Advisory Manager hire"). Never generic like "Compliance automation for ${i.company}". No clickbait.
 - Total of hook + body + cta: 60 to 110 words. No links, no em-dashes, no exclamation marks.
 - claims: list every factual sentence with its source: a company fact id (F...) or a Sprinto fact id (S...).
 
@@ -76,7 +76,7 @@ export async function writeDraft(g: Gemini, i: DraftInput): Promise<{ draft: Dra
   let draft: Draft | null = null;
   for (let attempt = 1; attempt <= 2; attempt++) {
     draft = await g.json<Draft>(draftPrompt(i, problems), SCHEMA);
-    const res = checkDraft(draft, { firstName: i.person.firstName, factIds });
+    const res = checkDraft(draft, { firstName: i.person.firstName, factIds, hookValue: i.hook.value });
     if (res.ok) return { draft, ok: true, problems: [], attempts: attempt };
     problems = res.problems;
   }

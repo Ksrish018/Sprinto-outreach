@@ -7,32 +7,39 @@ export type KillState = {
   fired_at: string | null;
 };
 
-export type WeekSummary = {
-  lastRun: { id: number; trigger: string; status: string; started_at: string } | null;
-  found: number;
-  go: number;
-  drafted: number;
-  sent: number;
-};
-
 export async function getKillState(): Promise<KillState> {
   const rows = (await sql()`select is_on, fired_line, fired_at from kill_state where id = 1`) as KillState[];
   return rows[0] ?? { is_on: false, fired_line: null, fired_at: null };
 }
 
-// Counts for the last 7 days; zero until the first run exists.
-export async function getWeekSummary(): Promise<WeekSummary> {
+// What is waiting on the Growth Lead, across all runs: drafts to review in Gmail, and Human-review companies not yet decided.
+export type NeedsYou = {
+  waiting: { id: number; company: string; contact: string | null; title: string | null }[];
+  appOnly: number;
+  review: { company_id: number; company: string; score: number | null; why: string | null }[];
+};
+
+export async function getNeedsYou(): Promise<NeedsYou> {
   const q = sql();
-  const [runs, counts] = await Promise.all([
-    q`select id, trigger, status, started_at from runs order by started_at desc limit 1`,
-    q`select
-        (select count(*) from companies where created_at > now() - interval '7 days')::int as found,
-        (select count(*) from decisions where outcome in ('go', 'go_flag') and created_at > now() - interval '7 days')::int as go,
-        (select count(*) from drafts where created_at > now() - interval '7 days')::int as drafted,
-        (select count(*) from sends where sent_at > now() - interval '7 days')::int as sent`,
+  const [waiting, appOnly, review] = await Promise.all([
+    q`select dr.id, coalesce(c.name, c.domain) as company, ct.name as contact, ct.title
+      from drafts dr join companies c on c.id = dr.company_id left join contacts ct on ct.id = dr.contact_id
+      where dr.status = 'in_gmail' order by dr.created_at desc limit 20`,
+    q`select count(*)::int as n from drafts where status = 'drafted'`,
+    q`select company_id, company, score, why from (
+        select distinct on (d.company_id) d.company_id, coalesce(c.name, c.domain) as company, d.score, d.outcome, d.override,
+          d.flags->>(jsonb_array_length(d.flags) - 1) as why
+        from decisions d join companies c on c.id = d.company_id
+        order by d.company_id, d.created_at desc
+      ) latest
+      where outcome = 'human' and override is null and not exists (select 1 from drafts dr where dr.company_id = latest.company_id)
+      order by score desc nulls last limit 20`,
   ]);
-  const c = (counts as { found: number; go: number; drafted: number; sent: number }[])[0];
-  return { lastRun: (runs as WeekSummary["lastRun"][])[0] ?? null, ...c };
+  return {
+    waiting: waiting as NeedsYou["waiting"],
+    appOnly: (appOnly as { n: number }[])[0]?.n ?? 0,
+    review: review as NeedsYou["review"],
+  };
 }
 
 export type IcpVersion = { id: number; weights: Record<string, number>; thresholds: Record<string, number>; note: string | null };
@@ -149,4 +156,22 @@ export async function getIcpConfirmation(): Promise<{ version: number; at: strin
   const rows = (await sql()`select (after->>'version')::int as version, at from audit_log
     where action = 'confirm_icp' order by at desc limit 1`) as { version: number; at: string }[];
   return rows[0] ?? null;
+}
+
+// Results: every email that left Gmail (or was discarded), with what it was built on, so each outcome traces back to one email.
+export type SentRow = {
+  draft_id: number; company_id: number; company: string; contact: string | null; title: string | null;
+  subject: string; hook: string; score: number | null; decision: string | null;
+  outcome: "accepted" | "edited" | "discarded"; sent_at: string | null;
+};
+
+export async function getSentLog(): Promise<SentRow[]> {
+  return (await sql()`select dr.id as draft_id, c.id as company_id, coalesce(c.name, c.domain) as company, ct.name as contact, ct.title,
+      dr.subject, dr.hook, d.score, d.outcome as decision, s.outcome, s.sent_at
+    from sends s
+    join drafts dr on dr.id = s.draft_id
+    join companies c on c.id = dr.company_id
+    left join contacts ct on ct.id = dr.contact_id
+    left join decisions d on d.company_id = dr.company_id and d.run_id = dr.run_id
+    order by s.sent_at desc nulls last, s.id desc limit 200`) as SentRow[];
 }

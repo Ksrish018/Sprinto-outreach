@@ -117,7 +117,7 @@ export async function personAndDraft(runId: number, companyId: number): Promise<
   }
   try {
     const pilot = `Pilot: would go to ${chosen.firstName} ${chosen.lastName} <${chosen.email}>, ${chosen.position}, ${c.name ?? c.domain}`.replace(/\s+/g, " ");
-    const gd = await createDraft(out.draft.subject, composeEmail(pilot, out.draft), runId);
+    const gd = await createDraft(out.draft.subject, composeEmail(pilot, out.draft, env().SENDER_NAME), runId);
     await q`update drafts set gmail_draft_id = ${gd.draftId}, thread_id = ${gd.threadId}, status = 'in_gmail' where id = ${draft.id}`;
     return "in_gmail";
   } catch (err) {
