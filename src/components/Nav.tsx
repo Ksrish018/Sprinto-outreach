@@ -8,6 +8,7 @@ import {
   Funnel,
   Heartbeat,
   House,
+  Path,
   ShieldCheck,
   SlidersHorizontal,
 } from "@phosphor-icons/react";
@@ -15,6 +16,7 @@ import styles from "./Nav.module.css";
 
 const ITEMS = [
   { href: "/", label: "This week", Icon: House },
+  { href: "/how-it-works", label: "How it works", Icon: Path },
   { href: "/pipeline", label: "Pipeline", Icon: Funnel },
   { href: "/drafts", label: "Drafts and Why", Icon: EnvelopeSimple },
   { href: "/results", label: "Results", Icon: ChartLineUp },

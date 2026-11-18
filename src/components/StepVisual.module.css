@@ -1,0 +1,395 @@
+/* Looping step illustrations. Every animation is 6s so the panel stays in rhythm. */
+.svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  font-family: var(--font-sans);
+}
+
+.cap,
+.capLeft {
+  font-size: 10.5px;
+  fill: var(--text3);
+  text-anchor: middle;
+}
+
+.capLeft {
+  text-anchor: start;
+  font-size: 11.5px;
+  fill: var(--text2);
+}
+
+.rung {
+  font-size: 12px;
+  fill: var(--text1);
+}
+
+/* find */
+.cell {
+  fill: var(--surface1);
+  stroke: var(--border-visible);
+  stroke-width: 1;
+}
+
+.picked {
+  animation: pick 6s var(--ease) infinite both;
+}
+
+.skipped {
+  animation: skip 6s var(--ease) infinite both;
+}
+
+.cross {
+  stroke: var(--error);
+  stroke-width: 2;
+  stroke-linecap: round;
+  opacity: 0;
+  animation: crossIn 6s var(--ease) infinite both;
+}
+
+@keyframes pick {
+  0%, 30% { fill: var(--surface1); stroke: var(--border-visible); }
+  40%, 92% { fill: var(--highlight); stroke: var(--highlight-edge); }
+  100% { fill: var(--surface1); }
+}
+
+@keyframes skip {
+  0%, 30% { fill: var(--surface1); }
+  40%, 92% { fill: var(--error-bg); stroke: var(--error); }
+  100% { fill: var(--surface1); }
+}
+
+@keyframes crossIn {
+  0%, 30% { opacity: 0; }
+  40%, 92% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+.lens {
+  animation: sweepLens 6s ease-in-out infinite;
+}
+
+.lensGlass {
+  fill: rgba(220, 240, 127, 0.25);
+  stroke: var(--accent);
+  stroke-width: 3;
+}
+
+.lensHandle {
+  stroke: var(--accent);
+  stroke-width: 5;
+  stroke-linecap: round;
+}
+
+@keyframes sweepLens {
+  0% { transform: translate(34px, 34px); }
+  25% { transform: translate(234px, 50px); }
+  50% { transform: translate(60px, 96px); }
+  75% { transform: translate(250px, 132px); }
+  100% { transform: translate(34px, 34px); }
+}
+
+/* research */
+.barBg {
+  fill: var(--surface1);
+  stroke: var(--border);
+}
+
+.barFill {
+  fill: var(--accent);
+  transform-box: fill-box;
+  transform-origin: left center;
+  animation: fill 6s var(--ease) infinite both;
+}
+
+@keyframes fill {
+  0% { transform: scaleX(0); opacity: 1; }
+  18%, 90% { transform: scaleX(1); opacity: 1; }
+  100% { transform: scaleX(1); opacity: 0; }
+}
+
+.quote {
+  opacity: 0;
+  animation: popIn 6s var(--ease) infinite both;
+}
+
+.quoteBg {
+  fill: var(--tag-bg);
+}
+
+.quoteText {
+  font-size: 9px;
+  fill: var(--text1);
+  text-anchor: middle;
+}
+
+.fetch {
+  fill: var(--border-visible);
+  animation: fetchOn 6s steps(1) infinite both;
+}
+
+@keyframes fetchOn {
+  0% { fill: var(--border-visible); }
+  2%, 92% { fill: var(--highlight-edge); }
+  100% { fill: var(--border-visible); }
+}
+
+@keyframes popIn {
+  0% { opacity: 0; transform: translateY(4px); }
+  8%, 88% { opacity: 1; transform: none; }
+  100% { opacity: 0; }
+}
+
+/* qualify */
+.gate {
+  opacity: 0;
+  animation: popIn 6s var(--ease) infinite both;
+}
+
+.gateDot {
+  fill: var(--success-bg);
+  stroke: var(--success);
+}
+
+.tick {
+  fill: none;
+  stroke: var(--success);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.seg {
+  transform-box: fill-box;
+  transform-origin: left center;
+  animation: fill 6s var(--ease) infinite both;
+}
+
+.seg0 { fill: var(--accent); }
+.seg1 { fill: #8E2B66; }
+.seg2 { fill: #B65A8E; }
+
+.threshold {
+  stroke: var(--text1);
+  stroke-width: 2;
+  stroke-dasharray: 3 3;
+}
+
+.goTag,
+.verified,
+.src {
+  opacity: 0;
+  animation: popIn 6s var(--ease) infinite both;
+}
+
+.goBg {
+  fill: var(--highlight);
+  stroke: var(--highlight-edge);
+}
+
+.goText,
+.goTextDark {
+  font-size: 11px;
+  font-weight: 600;
+  fill: #141012;
+  text-anchor: middle;
+}
+
+.goTextDark {
+  fill: var(--text1);
+  font-weight: 500;
+}
+
+/* person */
+.card {
+  opacity: 0;
+  animation: popIn 6s var(--ease) infinite both;
+}
+
+.cardBg {
+  fill: var(--surface1);
+  stroke: var(--border-visible);
+}
+
+.cardPick .cardBg {
+  animation: pickCard 6s var(--ease) infinite both;
+}
+
+@keyframes pickCard {
+  0%, 25% { stroke: var(--border-visible); stroke-width: 1; }
+  35%, 90% { stroke: var(--accent); stroke-width: 2.5; }
+  100% { stroke: var(--border-visible); }
+}
+
+.avatar {
+  fill: var(--tag-bg);
+  stroke: var(--border-visible);
+}
+
+.roleText,
+.bandText {
+  font-size: 9.5px;
+  fill: var(--text1);
+  text-anchor: middle;
+}
+
+.bandText,
+.bandTextLeft {
+  fill: var(--text3);
+  font-size: 9.5px;
+}
+
+/* draft */
+.line,
+.lineDark {
+  fill: var(--border-visible);
+}
+
+.lineDark {
+  fill: var(--text2);
+}
+
+
+.line {
+  transform-box: fill-box;
+  transform-origin: left center;
+}
+
+.hookLine {
+  fill: var(--highlight-edge);
+}
+
+g > .line {
+  animation: fill 6s var(--ease) infinite both;
+}
+
+.link {
+  stroke: var(--accent);
+  stroke-width: 1;
+  stroke-dasharray: 2 3;
+  fill: none;
+  opacity: 0;
+  animation: popIn 6s var(--ease) infinite both;
+}
+
+/* review */
+.env {
+  animation: drop 6s var(--ease) infinite both;
+}
+
+.envBg {
+  fill: var(--surface1);
+  stroke: var(--accent);
+  stroke-width: 1.5;
+}
+
+.envFlap {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 1.5;
+}
+
+@keyframes drop {
+  0% { transform: translate(40px, 80px); opacity: 0; }
+  10% { opacity: 1; }
+  35% { transform: translate(212px, 96px) scale(0.5); opacity: 1; }
+  45%, 100% { transform: translate(212px, 96px) scale(0.5); opacity: 0; }
+}
+
+.pencil {
+  opacity: 0;
+  animation: write 6s var(--ease) infinite both;
+}
+
+.pencilBody {
+  fill: var(--highlight);
+  stroke: var(--text1);
+  stroke-width: 1;
+}
+
+@keyframes write {
+  0%, 40% { opacity: 0; transform: translate(170px, 92px); }
+  48% { opacity: 1; }
+  60% { transform: translate(230px, 92px); }
+  68%, 100% { opacity: 0; transform: translate(230px, 108px); }
+}
+
+.sent {
+  opacity: 0;
+  animation: sentIn 6s var(--ease) infinite both;
+}
+
+@keyframes sentIn {
+  0%, 68% { opacity: 0; }
+  75%, 95% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* learn */
+.strike {
+  stroke: var(--error);
+  stroke-width: 2;
+  stroke-dasharray: 80;
+  stroke-dashoffset: 80;
+  animation: strikeIn 6s var(--ease) infinite both;
+}
+
+@keyframes strikeIn {
+  0%, 10% { stroke-dashoffset: 80; }
+  25%, 92% { stroke-dashoffset: 0; }
+  100% { stroke-dashoffset: 80; }
+}
+
+.inserted {
+  fill: var(--memory);
+  animation: fill 6s var(--ease) infinite both;
+  animation-delay: 0.8s;
+}
+
+.arrow {
+  animation: popIn 6s var(--ease) infinite both;
+  animation-delay: 1s;
+}
+
+.arrowLine {
+  fill: none;
+  stroke: var(--text2);
+  stroke-width: 1.5;
+}
+
+.loopRing {
+  fill: var(--memory-bg);
+  stroke: var(--memory);
+  stroke-width: 2;
+  stroke-dasharray: 4 4;
+}
+
+.loopSpin {
+  animation: spin 3s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.loopDot {
+  fill: var(--memory);
+}
+
+.mem {
+  fill: var(--memory-bg);
+  stroke: var(--memory);
+  opacity: 0;
+  animation: popIn 6s var(--ease) infinite both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .svg * {
+    animation: none !important;
+    opacity: 1 !important;
+  }
+
+  .lens {
+    transform: translate(150px, 80px);
+  }
+}

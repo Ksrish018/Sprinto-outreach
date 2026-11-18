@@ -131,3 +131,16 @@ export async function getDrafts(): Promise<DraftRow[]> {
     left join decisions d on d.company_id = dr.company_id and d.run_id = dr.run_id
     order by dr.created_at desc limit 100`) as DraftRow[];
 }
+
+export type RunFunnel = { drafts: number; blocked: number; inGmail: number; sent: number; edited: number };
+
+// Draft-side counts for one run, for the step-by-step view on Pipeline.
+export async function getRunFunnel(runId: number): Promise<RunFunnel> {
+  const [r] = (await sql()`select count(*)::int as drafts,
+      count(*) filter (where status = 'blocked')::int as blocked,
+      count(*) filter (where status = 'in_gmail')::int as "inGmail",
+      count(*) filter (where status in ('sent_edited', 'sent_as_is'))::int as sent,
+      count(*) filter (where status = 'sent_edited')::int as edited
+    from drafts where run_id = ${runId}`) as RunFunnel[];
+  return r ?? { drafts: 0, blocked: 0, inGmail: 0, sent: 0, edited: 0 };
+}

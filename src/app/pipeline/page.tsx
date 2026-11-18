@@ -1,10 +1,12 @@
 import Link from "next/link";
 import { EmptyState } from "@/components/EmptyState";
 import { OutcomeTag } from "@/components/OutcomeTag";
+import { PipelineFlow } from "@/components/PipelineFlow";
 import { PageHeader } from "@/components/PageHeader";
 import { Runner } from "@/components/Runner";
 import ui from "@/components/ui.module.css";
-import { getPipeline, getRun } from "@/lib/queries";
+import { getPipeline, getRun, getRunFunnel } from "@/lib/queries";
+import type { StepCounts } from "@/lib/pipeline-steps";
 
 const STATUS: Record<string, string> = {
   queued: "Waiting",
@@ -29,12 +31,32 @@ export default async function Pipeline({ searchParams }: PageProps<"/pipeline">)
       </>
     );
   }
-  const rows = await getPipeline(run.id);
+  const [rows, funnel] = await Promise.all([getPipeline(run.id), getRunFunnel(run.id)]);
   const counts = rows.reduce<Record<string, number>>((acc, r) => {
     const k = r.outcome ?? r.status;
     acc[k] = (acc[k] ?? 0) + 1;
     return acc;
   }, {});
+  const n = (k: string) => counts[k] ?? 0;
+  const researched = n("go") + n("go_flag") + n("human") + n("no_go");
+  const go = n("go") + n("go_flag");
+  const stepCounts: StepCounts = {
+    find: { value: rows.length, label: "found", sub: `${n("skipped")} skipped (customer, competitor or seen in 90 days)` },
+    research: { value: researched, label: "researched", sub: `${n("failed")} failed to read, ${n("queued") + n("researching")} still waiting` },
+    qualify: { value: go, label: "Go", sub: `${n("human")} Human review, ${n("no_go")} No-go` },
+    person: { value: funnel.drafts, label: "with a person", sub: go > funnel.drafts ? `${go - funnel.drafts} Go without a verified person or hook` : undefined },
+    draft: { value: funnel.drafts - funnel.blocked, label: funnel.drafts - funnel.blocked === 1 ? "draft" : "drafts", sub: funnel.blocked ? `${funnel.blocked} blocked by the claim checker` : undefined },
+    review: { value: funnel.inGmail, label: "in Gmail" },
+    learn: { value: funnel.sent, label: "sent", sub: `${funnel.edited} with your edits` },
+  };
+  const done = run.status === "done";
+  const verdict = !done ? null
+    : go > 0 ? null
+    : rows.length === 0 ? "The searches found no new companies this time. That is not a market signal: run a domain list, or wait for next week."
+    : n("skipped") >= rows.length / 2 ? "Most companies were skipped because they were researched in the last 90 days or are Sprinto customers. Fresh companies will come from next week's searches."
+    : n("human") >= n("no_go") && n("human") > 0 ? "No company was proven Go, but some are in Human review: research could not prove one deciding fact. Open them and approve the ones you agree with."
+    : n("failed") >= researched && n("failed") > 0 ? "Most sites could not be read (blocked or timed out). That is a technical issue, not a sign there are no targets."
+    : "Every company researched failed a gate or scored under 50. The ICP is strict for this batch; the reasons on each company show which rule cut most.";
 
   return (
     <>
@@ -54,6 +76,12 @@ export default async function Pipeline({ searchParams }: PageProps<"/pipeline">)
       <div className={ui.page}>
         <Runner runId={run.id} running={run.status === "running"} />
         {typeof run.counts.error === "string" && <p className={ui.errorText}>Run failed: {run.counts.error}</p>}
+        {verdict && (
+          <p className={ui.notice} role="status">
+            <b>No Go companies in this run.</b> {verdict} <Link className={ui.link} href="/how-it-works">How each step decides</Link>
+          </p>
+        )}
+        <PipelineFlow counts={stepCounts} compact />
         <section className={ui.card} style={{ padding: 0, overflow: "hidden" }}>
           <table className={ui.table}>
             <thead>
