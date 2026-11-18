@@ -2,6 +2,8 @@ import Link from "next/link";
 import { EmptyState } from "@/components/EmptyState";
 import { OutcomeTag } from "@/components/OutcomeTag";
 import { PipelineFlow } from "@/components/PipelineFlow";
+import { PoolCard } from "@/components/PoolCard";
+import { poolFunnel } from "@/lib/feeds/pool";
 import { PageHeader } from "@/components/PageHeader";
 import { Runner } from "@/components/Runner";
 import ui from "@/components/ui.module.css";
@@ -18,12 +20,13 @@ const STATUS: Record<string, string> = {
 
 export default async function Pipeline({ searchParams }: PageProps<"/pipeline">) {
   const { run: runParam } = await searchParams;
-  const run = await getRun(runParam ? Number(runParam) : undefined);
+  const [run, pool] = await Promise.all([getRun(runParam ? Number(runParam) : undefined), poolFunnel()]);
   if (!run) {
     return (
       <>
         <PageHeader title="Pipeline" />
         <div className={ui.page}>
+          <PoolCard pool={pool} />
           <EmptyState title="No runs yet" action={<Link href="/" className={`${ui.btn} ${ui.btnSecondary}`}>Start a run</Link>}>
             Every company in a run appears here by stage, with its decision and the reason research stopped.
           </EmptyState>
@@ -52,7 +55,7 @@ export default async function Pipeline({ searchParams }: PageProps<"/pipeline">)
   const done = run.status === "done";
   const verdict = !done ? null
     : go > 0 ? null
-    : rows.length === 0 ? "The searches found no new companies this time. That is not a market signal: run a domain list, or wait for next week."
+    : rows.length === 0 ? "The pool and web search had no new companies for this run. That is not a market signal: read the feeds now, run a domain list, or wait for tomorrow's read."
     : n("skipped") >= rows.length / 2 ? "Most companies were skipped because they were researched in the last 90 days or are Sprinto customers. Fresh companies will come from next week's searches."
     : n("human") >= n("no_go") && n("human") > 0 ? "No company was proven Go, but some are in Human review: research could not prove one deciding fact. Open them and approve the ones you agree with."
     : n("failed") >= researched && n("failed") > 0 ? "Most sites could not be read (blocked or timed out). That is a technical issue, not a sign there are no targets."
@@ -81,6 +84,7 @@ export default async function Pipeline({ searchParams }: PageProps<"/pipeline">)
             <b>No Go companies in this run.</b> {verdict} <Link className={ui.link} href="/how-it-works">How each step decides</Link>
           </p>
         )}
+        <PoolCard pool={pool} />
         <PipelineFlow counts={stepCounts} compact />
         <section className={ui.card} style={{ padding: 0, overflow: "hidden" }}>
           <table className={ui.table}>

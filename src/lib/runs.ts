@@ -5,6 +5,7 @@ import { Gemini } from "./gemini";
 import { domainsInHubspot } from "./hubspot";
 import { record } from "./ledger";
 import { personAndDraft } from "./outreach";
+import { takeFromPool } from "./feeds/pool";
 import { discover, SOURCE_SETS } from "./research/discovery";
 import { parseDomainList } from "./research/domains";
 import { extractFromPage, searchCompany } from "./research/extract";
@@ -16,6 +17,7 @@ import type { Decision, Thresholds, Weights } from "./research/qualify";
 const RESEARCH_COOLDOWN_DAYS = 90;
 const MAX_COMPANIES = 20;
 const FIND_MORE = { minGo: 5, maxRounds: 3 }; // Loop 2
+const POOL_TAKE = { first: 30, more: 15 }; // v5: companies taken from the news pool per round
 
 export class RunError extends Error {}
 
@@ -51,11 +53,12 @@ async function recentlyResearched(): Promise<Set<string>> {
   return new Set(rows.map((r) => r.domain));
 }
 
-async function enqueue(runId: number, items: { domain: string; name?: string; source: string; why?: string }[], skip: Map<string, string>) {
+async function enqueue(runId: number, items: { domain: string; name?: string; source: string; why?: string; leadId?: number }[], skip: Map<string, string>) {
   for (const it of items) {
-    const rows = (await sql()`insert into companies (domain, name, first_seen_run, source, why_picked)
-      values (${it.domain}, ${it.name ?? null}, ${runId}, ${it.source}, ${it.why ?? null})
-      on conflict (domain) do update set name = coalesce(companies.name, excluded.name)
+    const rows = (await sql()`insert into companies (domain, name, first_seen_run, source, why_picked, lead_id)
+      values (${it.domain}, ${it.name ?? null}, ${runId}, ${it.source}, ${it.why ?? null}, ${it.leadId ?? null})
+      on conflict (domain) do update set name = coalesce(companies.name, excluded.name),
+        why_picked = coalesce(excluded.why_picked, companies.why_picked), lead_id = coalesce(excluded.lead_id, companies.lead_id)
       returning id`) as { id: number }[];
     const reason = skip.get(it.domain);
     await sql()`insert into run_companies (run_id, company_id, status, stop_reason)
@@ -95,26 +98,41 @@ export async function createRun(input: { trigger: "cron" | "manual" | "domains";
   return run.id;
 }
 
-// FR-2 discovery, one source set per round (Loop 2 moves to the next set).
+// FR-2 discovery. v5: the news-feed pool first; web search (one source set per round) only when the pool is empty.
 async function findCompanies(runId: number, blocked: Set<string>) {
-  const run = (await sql()`select counts from runs where id = ${runId}`) as { counts: { rounds?: number } }[];
-  const round = run[0].counts.rounds ?? 0;
+  const run = (await sql()`select counts from runs where id = ${runId}`) as { counts: { rounds?: number; web_rounds?: number; from_pool?: number } }[];
+  const { rounds: round = 0, web_rounds: webRound = 0, from_pool: pooledSoFar = 0 } = run[0].counts;
   const exclude = new Set([...blocked, ...(await recentlyResearched())]);
   const existing = (await sql()`select c.domain from run_companies rc join companies c on c.id = rc.company_id where rc.run_id = ${runId}`) as { domain: string }[];
   for (const e of existing) exclude.add(e.domain);
 
+  const pooled = await takeFromPool(round === 0 ? POOL_TAKE.first : POOL_TAKE.more).catch(() => []);
+  const fromPool = pooled.filter((l) => !exclude.has(l.domain));
+  const dropped = pooled.filter((l) => exclude.has(l.domain)).map((l) => l.id);
+  if (dropped.length) await sql()`update leads set status = 'excluded', status_reason = 'Suppressed or researched recently', updated_at = now() where id = any(${dropped})`;
+  if (fromPool.length) {
+    await enqueue(runId, fromPool.map((l) => ({ domain: l.domain, name: l.name, source: "news feed", why: l.why, leadId: l.id })), new Map());
+    await sql()`update runs set counts = counts || ${JSON.stringify({ rounds: round + 1, from_pool: pooledSoFar + fromPool.length })}::jsonb where id = ${runId}`;
+    return fromPool.length;
+  }
+
+  // Backup: web search, when the pool is empty.
   const g = gemini(runId);
   let found: Awaited<ReturnType<typeof discover>> = [];
-  for (let i = round; i < SOURCE_SETS.length && found.length < MAX_COMPANIES; i++) {
+  let i = webRound;
+  for (; i < SOURCE_SETS.length && found.length < MAX_COMPANIES; i++) {
     const batch = await discover(g, SOURCE_SETS[i], exclude);
     for (const c of batch) exclude.add(c.domain);
     found.push(...batch);
-    await sql()`update runs set counts = counts || ${JSON.stringify({ rounds: i + 1 })}::jsonb where id = ${runId}`;
-    if (i - round >= 1) break; // at most two source sets per round keeps discovery cheap
+    if (i - webRound >= 1) {
+      i++;
+      break; // at most two source sets per round keeps discovery cheap
+    }
   }
+  await sql()`update runs set counts = counts || ${JSON.stringify({ rounds: round + 1, web_rounds: i })}::jsonb where id = ${runId}`;
   const known = await domainsInHubspot(found.map((c) => c.domain), runId).catch(() => new Set<string>());
   found = found.filter((c) => !known.has(c.domain)).sort((a, b) => b.preScore - a.preScore).slice(0, MAX_COMPANIES);
-  await enqueue(runId, found.map((c) => ({ domain: c.domain, name: c.name, source: "discovery", why: c.why })), new Map());
+  await enqueue(runId, found.map((c) => ({ domain: c.domain, name: c.name, source: "web search", why: c.why })), new Map());
   return found.length;
 }
 
@@ -176,6 +194,7 @@ export async function processNext(runId: number): Promise<{ domain: string; outc
     const deps = liveDeps(runId, c.domain, c.name ?? c.domain);
     const { result: r, decision: d } = await assess(c.domain, deps, icp);
     await saveResult(runId, c.company_id, r, d);
+    await sql()`update leads set status = 'researched', updated_at = now() where domain = ${c.domain} and status = 'queued'`;
     let outcome: string = d.outcome;
     if (d.outcome === "go" || d.outcome === "go_flag") {
       // Person + draft (steps 4 to 6). A failure here keeps the decision and is shown on the dossier.
@@ -202,7 +221,7 @@ async function finishOrFindMore(runId: number) {
   const busy = (await sql()`select 1 from run_companies where run_id = ${runId} and status in ('queued', 'researching') limit 1`) as unknown[];
   if (busy.length) return;
   const [go] = (await sql()`select count(*)::int as n from decisions where run_id = ${runId} and outcome in ('go', 'go_flag')`) as { n: number }[];
-  if (run.trigger !== "domains" && go.n < FIND_MORE.minGo && (run.counts.rounds ?? 0) < Math.min(FIND_MORE.maxRounds + 1, SOURCE_SETS.length)) {
+  if (run.trigger !== "domains" && go.n < FIND_MORE.minGo && (run.counts.rounds ?? 0) < FIND_MORE.maxRounds + 1) {
     const added = await findCompanies(runId, await suppressed()).catch(() => 0);
     if (added > 0) return;
   }

@@ -6,7 +6,7 @@ import ui from "@/components/ui.module.css";
 export const metadata = { title: "How it works · Sprinto Outreach" };
 
 const EMPTY = [
-  ["Few companies found", "The web searches returned a small sample this time.", "Not a market signal. Run your own domain list, or wait for next week's run."],
+  ["Few companies found", "Few new funding rounds in the news since the last read, or most were already on a compliance tool.", "Not a market signal. The Company pool on Pipeline shows where they dropped; read the feeds again tomorrow or run a domain list."],
   ["Mostly skipped", "Already researched in the last 90 days, or a Sprinto customer or competitor.", "Working as intended: nobody is contacted twice in a quarter."],
   ["Mostly No-go", "Failed a gate (not SaaS, wrong size, already uses a compliance tool) or scored under 50.", "The ICP is strict for this batch. The reasons on each company show which rule cut most."],
   ["Mostly Human review", "Research could not prove one fact that would decide it.", "Targets probably exist. Open the company and click Approve as Go if you agree."],

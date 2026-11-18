@@ -9,6 +9,7 @@ import {
   Heartbeat,
   House,
   Path,
+  Crosshair,
   ShieldCheck,
   SlidersHorizontal,
 } from "@phosphor-icons/react";
@@ -16,6 +17,7 @@ import styles from "./Nav.module.css";
 
 const ITEMS = [
   { href: "/", label: "This week", Icon: House },
+  { href: "/icp", label: "ICP", Icon: Crosshair },
   { href: "/how-it-works", label: "How it works", Icon: Path },
   { href: "/pipeline", label: "Pipeline", Icon: Funnel },
   { href: "/drafts", label: "Drafts and Why", Icon: EnvelopeSimple },

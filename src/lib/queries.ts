@@ -144,3 +144,9 @@ export async function getRunFunnel(runId: number): Promise<RunFunnel> {
     from drafts where run_id = ${runId}`) as RunFunnel[];
   return r ?? { drafts: 0, blocked: 0, inGmail: 0, sent: 0, edited: 0 };
 }
+
+export async function getIcpConfirmation(): Promise<{ version: number; at: string } | null> {
+  const rows = (await sql()`select (after->>'version')::int as version, at from audit_log
+    where action = 'confirm_icp' order by at desc limit 1`) as { version: number; at: string }[];
+  return rows[0] ?? null;
+}

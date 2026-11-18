@@ -12,7 +12,7 @@ export function StepVisual({ id }: { id: StepId }) {
 }
 
 const LABEL: Record<StepId, string> = {
-  find: "A search lens sweeps across companies; some are picked, some skipped",
+  find: "A lens sweeps across companies from the news; some are picked, some dropped",
   research: "Three sources are read in order while a budget meter fills up to 15 fetches",
   qualify: "Three gates are checked, then the score fills past the Go line at 50",
   person: "Three possible roles; the right one is picked and the email verified",
@@ -44,7 +44,7 @@ const VISUAL: Record<StepId, () => ReactNode> = {
           <circle cx="0" cy="0" r="17" className={v.lensGlass} />
           <path d="M12 12 l13 13" className={v.lensHandle} />
         </g>
-        <text x="150" y="182" className={v.cap}>4 searches · picked · skipped (customer or seen in 90 days)</text>
+        <text x="150" y="182" className={v.cap}>News feeds · picked · dropped (on a compliance tool)</text>
       </>
     );
   },
